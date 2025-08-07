@@ -1,0 +1,689 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "REST Todo API",
+    "description": "API Spec for REST Todo API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api"
+    }
+  ],
+  "paths": {
+    "/register": {
+      "post": {
+        "tags": ["Auth API"],
+        "summary": "Register a user",
+        "description": "Register a new user with username & password.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully registered a user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse200"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - username already exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse409"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": ["Auth API"],
+        "summary": "Login user",
+        "description": "Login user with username & password.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully registered a user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse200"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse401"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks": {
+      "post": {
+        "tags": ["Task API"],
+        "summary": "Create task",
+        "description": "Create a new task with title, description, status, and due date.",
+        "security": [{"bearerAuth":[]}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskCreateOrUpdateReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created — Successfully created task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number",
+                      "example": 201
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "Created"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Task"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request — Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse401"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Task API"],
+        "summary": "Find tasks by filter",
+        "description": "Find all tasks from the database by filter (status, due_date). If param is empty, retrieved all tasks.",
+        "security": [{"bearerAuth":[]}],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["pending", "done"]
+            }
+          },
+          {
+            "name": "due_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved all tasks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Task"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse401"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{taskId}": {
+      "get": {
+        "tags": ["Task API"],
+        "summary": "Find by ID",
+        "description": "Find an task by ID",
+        "security": [{"bearerAuth":[]}],
+        "parameters": [
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "description": "Task Id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved task",
+            "content": {
+              "application/json": {
+                "schema":{
+                  "$ref": "#/components/schemas/TaskResponse200"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse401"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task is not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse404"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Task API"],
+        "summary": "Update by ID",
+        "description": "Update an task by ID",
+        "security": [{"bearerAuth":[]}],
+        "parameters": [
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "description": "Task Id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskCreateOrUpdateReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse200"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse404"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - You don't have access to this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task is not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse404"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Task API"],
+        "summary": "Delete by ID",
+        "description": "Delete an task by ID",
+        "security": [{"bearerAuth":[]}],
+        "parameters": [
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "description": "Task Id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse200"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - You don't have access to this resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task is not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse404"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response500"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth":{
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Task":{
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "examples": ["pending"]
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "a date with UTC format",
+            "example": "2025-08-06T06:43:34Z"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "a date with UTC format",
+            "example": "2025-08-06T06:43:34Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "a date with UTC format",
+            "example": "2025-08-06T06:43:34Z"
+          }
+        }
+      },
+      "TaskCreateOrUpdateReq":{
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "done"]
+          }
+        }
+      },
+      "TaskResponse200":{
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "number",
+            "example": 200
+          },
+          "status": {
+            "type": "string",
+            "example": "OK"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Task"
+          }
+        }
+      },
+      "TaskResponse400":{
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "number",
+            "example": 400
+          },
+          "status": {
+            "type": "string",
+            "example": "BAD REQUEST"
+          },
+          "data": {
+            "type":"string"
+          }
+        }
+      },
+      "TaskResponse401":{
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "number",
+            "example": 401
+          },
+          "status": {
+            "type": "string",
+            "example": "UNAUTHORIZED"
+          },
+          "data": {
+            "type":"string",
+            "example": "Invalid or missing token"
+          }
+        }
+      },
+      "TaskResponse403":{
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "number",
+            "example": 403
+          },
+          "status": {
+            "type": "string",
+            "example": "FORBIDDEN"
+          },
+          "data": {
+            "type":"string",
+            "example": "You don't have access to this resource"
+          }
+        }
+      },
+      "TaskResponse404":{
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "number",
+            "example": 404
+          },
+          "status": {
+            "type": "string",
+            "example": "NOT FOUND"
+          },
+          "data": {
+            "type":"string",
+            "example": "task is not found"
+          }
+        }
+      },
+      "Response500":{
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "number",
+            "example": 500
+          },
+          "status": {
+            "type": "string",
+            "example": "INTERNAL SERVER ERROR"
+          },
+          "data": {
+            "type":"string"
+          }
+        }
+      },
+      "AuthRequest":{
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 20
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 64
+          }
+        }
+      },
+      "AuthResponse200":{
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "number",
+            "example": 200
+          },
+          "status": {
+            "type": "string",
+            "example": "OK"
+          },
+          "data": {
+            "type":"object",
+            "properties": {
+              "username": {
+                "type":"string"
+              }
+            }
+          }
+        }
+      },   
+      "AuthResponse409":{
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "number",
+            "example": 409
+          },
+          "status": {
+            "type": "string",
+            "example": "CONFLICT"
+          },
+          "data": {
+            "type":"string",
+            "example": "Username already exist"
+          }
+        }
+      }
+    }
+  }
+}
