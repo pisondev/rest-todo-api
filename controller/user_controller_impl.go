@@ -36,3 +36,22 @@ func (controller *UserControllerImpl) Register(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusCreated).JSON(webResponse)
 }
+
+func (controller *UserControllerImpl) Login(ctx *fiber.Ctx) error {
+	userAuthRequest := web.UserAuthRequest{}
+	err := ctx.BodyParser(&userAuthRequest)
+	if err != nil {
+		return err
+	}
+	userResponse, err := controller.UserService.Login(ctx.Context(), userAuthRequest)
+	if err != nil {
+		return err
+	}
+
+	webResponse := web.WebResponse{
+		Code:   200,
+		Status: "OK",
+		Data:   userResponse,
+	}
+	return ctx.Status(fiber.StatusOK).JSON(webResponse)
+}

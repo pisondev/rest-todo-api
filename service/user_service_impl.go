@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"os"
 	"rest-todo-api/helper"
 	"rest-todo-api/model/domain"
 	"rest-todo-api/model/web"
@@ -10,6 +11,8 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -61,4 +64,47 @@ func (service *UserServiceImpl) Register(ctx context.Context, req web.UserAuthRe
 	}
 
 	return helper.ToUserResponse(savedUser), nil
+}
+
+func (service *UserServiceImpl) Login(ctx context.Context, req web.UserAuthRequest) (web.UserLoginResponse, error) {
+	err := godotenv.Load()
+	if err != nil {
+		return web.UserLoginResponse{}, err
+	}
+
+	tx, err := service.DB.Begin()
+	if err != nil {
+		return web.UserLoginResponse{}, err
+	}
+	defer tx.Rollback()
+
+	foundUser, err := service.UserRepository.FindByUsername(ctx, tx, req.Username)
+	if err != nil {
+		return web.UserLoginResponse{}, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(foundUser.HashedPassword), []byte(req.Password))
+	if err != nil {
+		return web.UserLoginResponse{}, err
+	}
+
+	claims := web.JWTClaims{
+		UserID: foundUser.Id,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	secretKey := []byte(os.Getenv("JWT_SECRET_KEY"))
+	tokenString, err := token.SignedString(secretKey)
+	if err != nil {
+		return web.UserLoginResponse{}, err
+	}
+
+	return web.UserLoginResponse{
+		Token: tokenString,
+	}, nil
 }

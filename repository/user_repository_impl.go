@@ -28,3 +28,21 @@ func (repository *UserRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, user
 	user.Id = int(id)
 	return user, nil
 }
+
+func (repository *UserRepositoryImpl) FindByUsername(ctx context.Context, tx *sql.Tx, username string) (domain.User, error) {
+	SQL := "SELECT id, username, hashed_password FROM users WHERE username = ?"
+	rows, err := tx.QueryContext(ctx, SQL, username)
+	if err != nil {
+		return domain.User{}, err
+	}
+	defer rows.Close()
+
+	var user domain.User
+	if rows.Next() {
+		err := rows.Scan(&user.Id, &user.Username, &user.HashedPassword)
+		if err != nil {
+			return domain.User{}, err
+		}
+	}
+	return user, nil
+}
