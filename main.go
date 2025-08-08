@@ -3,6 +3,7 @@ package main
 import (
 	"rest-todo-api/app"
 	"rest-todo-api/controller"
+	"rest-todo-api/exception"
 	"rest-todo-api/repository"
 	"rest-todo-api/service"
 
@@ -19,11 +20,13 @@ func main() {
 	userService := service.NewUserService(userRepository, db, validate)
 	userController := controller.NewUserController(userService)
 
-	app := fiber.New()
+	server := fiber.New(fiber.Config{
+		ErrorHandler: exception.ErrorHandler,
+	})
 
-	app.Post("/api/register", userController.Register)
+	server.Post("/api/register", userController.Register)
 
-	err := app.Listen(":3000")
+	err := server.Listen(":3000")
 	if err != nil {
 		panic(err)
 	}
