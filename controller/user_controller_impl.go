@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"rest-todo-api/helper"
 	"rest-todo-api/model/web"
 	"rest-todo-api/service"
 
@@ -21,10 +20,14 @@ func NewUserController(userService service.UserService) UserController {
 func (controller *UserControllerImpl) Register(ctx *fiber.Ctx) error {
 	userAuthRequest := web.UserAuthRequest{}
 	err := ctx.BodyParser(&userAuthRequest)
-	helper.PanicIfError(err)
+	if err != nil {
+		return err
+	}
 
 	userResponse, err := controller.UserService.Register(ctx.Context(), userAuthRequest)
-	helper.PanicIfError(err)
+	if err != nil {
+		return err
+	}
 	webResponse := web.WebResponse{
 		Code:   201,
 		Status: "Created",
