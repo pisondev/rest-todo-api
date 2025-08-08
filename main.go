@@ -25,6 +25,7 @@ func main() {
 	})
 
 	server.Post("/api/register", userController.Register)
+	server.Post("/api/login", userController.Login)
 
 	err := server.Listen(":3000")
 	if err != nil {
