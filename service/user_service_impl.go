@@ -7,6 +7,7 @@ import (
 	"rest-todo-api/model/domain"
 	"rest-todo-api/model/web"
 	"rest-todo-api/repository"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
@@ -46,6 +47,7 @@ func (service *UserServiceImpl) Register(ctx context.Context, req web.UserAuthRe
 	user := domain.User{
 		Username:       req.Username,
 		HashedPassword: string(hashedPassword),
+		CreatedAt:      time.Now().UTC().Truncate(time.Second),
 	}
 
 	savedUser, err := service.UserRepository.Save(ctx, tx, user)
