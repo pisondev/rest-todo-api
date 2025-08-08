@@ -12,6 +12,12 @@ type UserControllerImpl struct {
 	UserService service.UserService
 }
 
+func NewUserController(userService service.UserService) UserController {
+	return &UserControllerImpl{
+		UserService: userService,
+	}
+}
+
 func (controller *UserControllerImpl) Register(ctx *fiber.Ctx) error {
 	userAuthRequest := web.UserAuthRequest{}
 	err := ctx.BodyParser(&userAuthRequest)
