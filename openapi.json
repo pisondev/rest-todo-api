@@ -130,7 +130,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TaskCreateOrUpdateReq"
+                "$ref": "#/components/schemas/TaskCreateReq"
               }
             }
           }
@@ -323,7 +323,7 @@
           }
         }
       },
-      "put": {
+      "patch": {
         "tags": ["Task API"],
         "summary": "Update by ID",
         "description": "Update an task by ID",
@@ -341,7 +341,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TaskCreateOrUpdateReq"
+                "$ref": "#/components/schemas/TaskUpdateReq"
               }
             }
           }
@@ -522,9 +522,8 @@
           }
         }
       },
-      "TaskCreateOrUpdateReq":{
+      "TaskRequest":{
         "type": "object",
-        "required": ["title"],
         "properties": {
           "title": {
             "type": "string",
@@ -538,8 +537,24 @@
           "status": {
             "type": "string",
             "enum": ["pending", "done"]
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-06T06:43:34Z"
           }
         }
+      },
+      "TaskCreateReq":{
+        "allOf": [
+          {"$ref":"#/components/schemas/TaskRequest"}
+        ],
+        "required": ["title"]       
+      },
+      "TaskUpdateReq":{
+        "allOf": [
+          {"$ref":"#/components/schemas/TaskRequest"}
+        ]      
       },
       "TaskResponse200":{
         "type": "object",
