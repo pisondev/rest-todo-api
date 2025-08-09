@@ -1,14 +1,16 @@
 package domain
 
-import "time"
+import (
+	"time"
+)
 
 type Task struct {
 	ID          int
 	UserID      int
 	Title       string
-	Description string
-	Status      TaskStatus
-	DueDate     time.Time
+	Description *string
+	Status      *TaskStatus
+	DueDate     *time.Time
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
