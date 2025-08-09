@@ -13,7 +13,6 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -74,11 +73,6 @@ func (service *UserServiceImpl) Register(ctx context.Context, req web.UserAuthRe
 
 func (service *UserServiceImpl) Login(ctx context.Context, req web.UserAuthRequest) (web.UserLoginResponse, error) {
 	err := service.Validate.Struct(req)
-	if err != nil {
-		return web.UserLoginResponse{}, err
-	}
-
-	err = godotenv.Load()
 	if err != nil {
 		return web.UserLoginResponse{}, err
 	}
