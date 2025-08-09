@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"os"
+	"rest-todo-api/exception"
 	"rest-todo-api/helper"
 	"rest-todo-api/model/domain"
 	"rest-todo-api/model/web"
@@ -42,6 +43,11 @@ func (service *UserServiceImpl) Register(ctx context.Context, req web.UserAuthRe
 	}
 	defer tx.Rollback()
 
+	_, err = service.UserRepository.FindByUsername(ctx, tx, req.Username)
+	if err != sql.ErrNoRows {
+		return web.UserResponse{}, exception.ErrConflict
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return web.UserResponse{}, err
@@ -67,7 +73,12 @@ func (service *UserServiceImpl) Register(ctx context.Context, req web.UserAuthRe
 }
 
 func (service *UserServiceImpl) Login(ctx context.Context, req web.UserAuthRequest) (web.UserLoginResponse, error) {
-	err := godotenv.Load()
+	err := service.Validate.Struct(req)
+	if err != nil {
+		return web.UserLoginResponse{}, err
+	}
+
+	err = godotenv.Load()
 	if err != nil {
 		return web.UserLoginResponse{}, err
 	}
@@ -80,12 +91,12 @@ func (service *UserServiceImpl) Login(ctx context.Context, req web.UserAuthReque
 
 	foundUser, err := service.UserRepository.FindByUsername(ctx, tx, req.Username)
 	if err != nil {
-		return web.UserLoginResponse{}, err
+		return web.UserLoginResponse{}, exception.ErrUnauthorizedLogin
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(foundUser.HashedPassword), []byte(req.Password))
 	if err != nil {
-		return web.UserLoginResponse{}, err
+		return web.UserLoginResponse{}, exception.ErrUnauthorizedLogin
 	}
 
 	claims := web.JWTClaims{
