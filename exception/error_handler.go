@@ -18,6 +18,18 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 		code = fiber.StatusBadRequest
 		status = "BAD REQUEST"
 	}
+	if errors.Is(err, ErrUnauthorized) {
+		code = fiber.StatusUnauthorized
+		status = "UNAUTHORIZED"
+	}
+	if errors.Is(err, ErrUnauthorizedLogin) {
+		code = fiber.StatusUnauthorized
+		status = "UNAUTHORIZED"
+	}
+	if errors.Is(err, ErrConflict) {
+		code = fiber.StatusConflict
+		status = "CONFLICT"
+	}
 
 	webResponse := web.WebResponse{
 		Code:   code,
