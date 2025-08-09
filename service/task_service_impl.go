@@ -7,6 +7,7 @@ import (
 	"rest-todo-api/model/domain"
 	"rest-todo-api/model/web"
 	"rest-todo-api/repository"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -31,14 +32,24 @@ func (service *TaskServiceImpl) Create(ctx context.Context, req web.TaskCreateRe
 		return web.TaskResponse{}, err
 	}
 
+	if req.Status == nil {
+		var pending = domain.StatusPending
+		req.Status = &pending
+	}
+
 	tx, err := service.DB.Begin()
 	if err != nil {
 		return web.TaskResponse{}, err
 	}
 
 	task := domain.Task{
-		UserID: req.UserID,
-		Title:  req.Title,
+		UserID:      req.UserID,
+		Title:       req.Title,
+		Description: req.Description,
+		Status:      req.Status,
+		DueDate:     req.DueDate,
+		CreatedAt:   time.Now().UTC().Truncate(time.Second),
+		UpdatedAt:   time.Now().UTC().Truncate(time.Second),
 	}
 
 	createdTask, err := service.TaskRepository.Create(ctx, tx, task)
