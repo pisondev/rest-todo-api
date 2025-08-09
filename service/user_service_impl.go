@@ -40,10 +40,10 @@ func (service *UserServiceImpl) Register(ctx context.Context, req web.UserAuthRe
 	if err != nil {
 		return web.UserResponse{}, err
 	}
-	defer tx.Rollback()
 
 	_, err = service.UserRepository.FindByUsername(ctx, tx, req.Username)
 	if err != sql.ErrNoRows {
+		tx.Rollback()
 		return web.UserResponse{}, exception.ErrConflict
 	}
 
@@ -60,6 +60,7 @@ func (service *UserServiceImpl) Register(ctx context.Context, req web.UserAuthRe
 
 	savedUser, err := service.UserRepository.Save(ctx, tx, user)
 	if err != nil {
+		tx.Rollback()
 		return web.UserResponse{}, err
 	}
 
@@ -81,10 +82,10 @@ func (service *UserServiceImpl) Login(ctx context.Context, req web.UserAuthReque
 	if err != nil {
 		return web.UserLoginResponse{}, err
 	}
-	defer tx.Rollback()
 
 	foundUser, err := service.UserRepository.FindByUsername(ctx, tx, req.Username)
 	if err != nil {
+		tx.Rollback()
 		return web.UserLoginResponse{}, exception.ErrUnauthorizedLogin
 	}
 
@@ -107,6 +108,11 @@ func (service *UserServiceImpl) Login(ctx context.Context, req web.UserAuthReque
 	tokenString, err := token.SignedString(secretKey)
 	if err != nil {
 		return web.UserLoginResponse{}, err
+	}
+
+	errCommit := tx.Commit()
+	if errCommit != nil {
+		return web.UserLoginResponse{}, errCommit
 	}
 
 	return web.UserLoginResponse{
