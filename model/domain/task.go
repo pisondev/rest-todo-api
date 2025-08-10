@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -10,7 +11,7 @@ type Task struct {
 	Title       string
 	Description *string
 	Status      *TaskStatus
-	DueDate     *time.Time
+	DueDate     sql.NullTime
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
