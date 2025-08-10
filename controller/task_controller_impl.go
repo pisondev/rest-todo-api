@@ -21,7 +21,12 @@ func (controller *TaskControllerImpl) Create(ctx *fiber.Ctx) error {
 	taskCreateRequest := web.TaskCreateRequest{}
 	err := ctx.BodyParser(&taskCreateRequest)
 	if err != nil {
-		return err
+		webResponse := web.WebResponse{
+			Code:   fiber.StatusBadRequest,
+			Status: "BAD REQUEST",
+			Data:   err.Error(),
+		}
+		return ctx.Status(fiber.StatusBadRequest).JSON(webResponse)
 	}
 
 	userIDString := ctx.Locals("userID")
