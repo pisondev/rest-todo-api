@@ -8,4 +8,5 @@ import (
 
 type TaskService interface {
 	Create(ctx context.Context, req web.TaskCreateRequest) (web.TaskResponse, error)
+	FindTasks(ctx context.Context, req web.TaskFilterRequest) ([]web.TaskResponse, error)
 }
