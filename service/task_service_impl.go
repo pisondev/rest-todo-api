@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"rest-todo-api/exception"
 	"rest-todo-api/helper"
 	"rest-todo-api/model/domain"
 	"rest-todo-api/model/web"
@@ -47,9 +48,21 @@ func (service *TaskServiceImpl) Create(ctx context.Context, req web.TaskCreateRe
 		Title:       req.Title,
 		Description: req.Description,
 		Status:      req.Status,
-		DueDate:     req.DueDate,
 		CreatedAt:   time.Now().UTC().Truncate(time.Second),
 		UpdatedAt:   time.Now().UTC().Truncate(time.Second),
+	}
+
+	if req.DueDate != nil {
+		if *req.DueDate != "" {
+			parsedTime, err := time.Parse(time.RFC3339, *req.DueDate)
+			if err != nil {
+				return web.TaskResponse{}, exception.ErrBadRequestTimeFormat
+			}
+			task.DueDate = sql.NullTime{
+				Time:  parsedTime,
+				Valid: true,
+			}
+		}
 	}
 
 	createdTask, err := service.TaskRepository.Create(ctx, tx, task)
