@@ -78,3 +78,42 @@ func (service *TaskServiceImpl) Create(ctx context.Context, req web.TaskCreateRe
 
 	return helper.ToTaskResponse(createdTask), nil
 }
+
+func (service *TaskServiceImpl) FindTasks(ctx context.Context, req web.TaskFilterRequest) ([]web.TaskResponse, error) {
+	taskFilter := repository.TaskFilter{}
+	tx, err := service.DB.Begin()
+	if err != nil {
+		return []web.TaskResponse{}, err
+	}
+
+	// if there is query param, we will include it here
+	if req.Status != nil {
+		if *req.Status != "" {
+			taskFilter.Status = req.Status
+		}
+	}
+
+	if req.DueDate != nil {
+		if *req.DueDate != "" {
+			dueDate, err := time.Parse(time.RFC3339, *req.DueDate)
+			if err != nil {
+				return []web.TaskResponse{}, exception.ErrBadRequestTimeFormat
+			}
+
+			taskFilter.DueDate = &dueDate
+		}
+	}
+
+	tasks, err := service.TaskRepository.FindTasks(ctx, tx, taskFilter)
+	if err != nil {
+		tx.Rollback()
+		return []web.TaskResponse{}, err
+	}
+
+	errCommit := tx.Commit()
+	if errCommit != nil {
+		return []web.TaskResponse{}, errCommit
+	}
+
+	return helper.ToTaskResponses(tasks), nil
+}

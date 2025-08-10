@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"rest-todo-api/model/domain"
 	"rest-todo-api/model/web"
 	"rest-todo-api/service"
 
@@ -55,4 +56,26 @@ func (controller *TaskControllerImpl) Create(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusCreated).JSON(webResponse)
+}
+
+func (controller *TaskControllerImpl) FindTasks(ctx *fiber.Ctx) error {
+	status := ctx.Query("status")
+	dueDateStr := ctx.Query("due_date")
+
+	taskFilterRequest := web.TaskFilterRequest{
+		Status:  (*domain.TaskStatus)(&status),
+		DueDate: &dueDateStr,
+	}
+	taskResponse, err := controller.TaskService.FindTasks(ctx.Context(), taskFilterRequest)
+	if err != nil {
+		return err
+	}
+
+	webResponse := web.WebResponse{
+		Code:   200,
+		Status: "OK",
+		Data:   taskResponse,
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(webResponse)
 }
