@@ -18,6 +18,10 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 		code = fiber.StatusBadRequest
 		status = "BAD REQUEST"
 	}
+	if errors.Is(err, ErrBadRequestTimeFormat) {
+		code = fiber.StatusBadRequest
+		status = "BAD REQUEST"
+	}
 	if errors.Is(err, ErrUnauthorized) {
 		code = fiber.StatusUnauthorized
 		status = "UNAUTHORIZED"
