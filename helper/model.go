@@ -29,3 +29,11 @@ func ToTaskResponse(task domain.Task) web.TaskResponse {
 	}
 	return response
 }
+
+func ToTaskResponses(tasks []domain.Task) []web.TaskResponse {
+	var taskResponses []web.TaskResponse
+	for _, task := range tasks {
+		taskResponses = append(taskResponses, ToTaskResponse(task))
+	}
+	return taskResponses
+}
