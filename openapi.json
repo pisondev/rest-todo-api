@@ -243,6 +243,16 @@
               }
             }
           },
+          "400": {
+            "description": "Bad request — Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse400"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Unauthorized - Invalid or missing token",
             "content": {
@@ -362,7 +372,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TaskResponse404"
+                  "$ref": "#/components/schemas/TaskResponse400"
                 }
               }
             }
