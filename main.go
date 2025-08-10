@@ -42,6 +42,7 @@ func main() {
 	taskRoutes := server.Group("/api/tasks", middleware.AuthMiddleware())
 
 	taskRoutes.Post("", taskController.Create)
+	taskRoutes.Get("", taskController.FindTasks)
 
 	err = server.Listen(":3000")
 	if err != nil {
