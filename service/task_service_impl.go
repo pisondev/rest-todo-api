@@ -117,3 +117,24 @@ func (service *TaskServiceImpl) FindTasks(ctx context.Context, req web.TaskFilte
 
 	return helper.ToTaskResponses(tasks), nil
 }
+
+func (service *TaskServiceImpl) FindByID(ctx context.Context, taskID int) (web.TaskResponse, error) {
+	tx, err := service.DB.Begin()
+	if err != nil {
+		return web.TaskResponse{}, err
+	}
+	task, err := service.TaskRepository.FindByID(ctx, tx, taskID)
+	if err != nil {
+		errRollback := tx.Rollback()
+		if errRollback != nil {
+			return web.TaskResponse{}, errRollback
+		}
+		return web.TaskResponse{}, err
+	}
+
+	errCommit := tx.Commit()
+	if errCommit != nil {
+		return web.TaskResponse{}, errCommit
+	}
+	return helper.ToTaskResponse(task), nil
+}

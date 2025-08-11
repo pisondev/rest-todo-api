@@ -4,6 +4,7 @@ import (
 	"rest-todo-api/model/domain"
 	"rest-todo-api/model/web"
 	"rest-todo-api/service"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -77,5 +78,24 @@ func (controller *TaskControllerImpl) FindTasks(ctx *fiber.Ctx) error {
 		Data:   taskResponse,
 	}
 
+	return ctx.Status(fiber.StatusOK).JSON(webResponse)
+}
+
+func (controller *TaskControllerImpl) FindByID(ctx *fiber.Ctx) error {
+	taskIDStr := ctx.Params("taskID")
+	taskID, err := strconv.Atoi(taskIDStr)
+	if err != nil {
+		return err
+	}
+	taskResponse, err := controller.TaskService.FindByID(ctx.Context(), taskID)
+	if err != nil {
+		return err
+	}
+
+	webResponse := web.WebResponse{
+		Code:   200,
+		Status: "OK",
+		Data:   taskResponse,
+	}
 	return ctx.Status(fiber.StatusOK).JSON(webResponse)
 }

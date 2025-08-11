@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"rest-todo-api/exception"
 	"rest-todo-api/model/domain"
 )
 
@@ -60,4 +61,24 @@ func (repository *TaskRepositoryImpl) FindTasks(ctx context.Context, tx *sql.Tx,
 		tasks = append(tasks, task)
 	}
 	return tasks, nil
+}
+
+func (repository *TaskRepositoryImpl) FindByID(ctx context.Context, tx *sql.Tx, taskID int) (domain.Task, error) {
+	SQL := "SELECT id, user_id, title, description, status, due_date, created_at, updated_at from tasks WHERE id = ?"
+	rows, err := tx.QueryContext(ctx, SQL, taskID)
+	if err != nil {
+		return domain.Task{}, err
+	}
+	defer rows.Close()
+
+	task := domain.Task{}
+	if rows.Next() {
+		err := rows.Scan(&task.ID, &task.UserID, &task.Title, &task.Description, &task.Status, &task.DueDate, &task.CreatedAt, &task.UpdatedAt)
+		if err != nil {
+			return domain.Task{}, err
+		}
+		return task, nil
+	} else {
+		return task, exception.ErrNotFoundTask
+	}
 }
