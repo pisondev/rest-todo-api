@@ -1,8 +1,10 @@
 package helper
 
 import (
+	"database/sql"
 	"rest-todo-api/model/domain"
 	"rest-todo-api/model/web"
+	"time"
 )
 
 func ToUserResponse(user domain.User) web.UserResponse {
@@ -33,6 +35,13 @@ func ToTaskResponse(task domain.Task) web.TaskResponse {
 func ToTaskResponses(tasks []domain.Task) []web.TaskResponse {
 	var taskResponses []web.TaskResponse
 	for _, task := range tasks {
+		task.DueDate = sql.NullTime{
+			Time:  task.DueDate.Time.UTC().Truncate(time.Second),
+			Valid: true,
+		}
+		task.CreatedAt = task.CreatedAt.UTC().Truncate(time.Second)
+		task.UpdatedAt = task.UpdatedAt.UTC().Truncate(time.Second)
+
 		taskResponses = append(taskResponses, ToTaskResponse(task))
 	}
 	return taskResponses
