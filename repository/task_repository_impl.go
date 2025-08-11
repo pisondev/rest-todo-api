@@ -52,6 +52,10 @@ func (repository *TaskRepositoryImpl) FindTasks(ctx context.Context, tx *sql.Tx,
 			args = append(args, taskFilter.DueDate)
 		}
 	}
+
+	SQL += " AND user_id = ?"
+	args = append(args, taskFilter.UserID)
+
 	rows, err := tx.QueryContext(ctx, SQL, args...)
 	if err != nil {
 		return []domain.Task{}, err

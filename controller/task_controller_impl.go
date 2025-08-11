@@ -63,8 +63,21 @@ func (controller *TaskControllerImpl) FindTasks(ctx *fiber.Ctx) error {
 	status := ctx.Query("status")
 	dueDateStr := ctx.Query("due_date")
 
+	userIDStr := ctx.Locals("userID")
+	userID, ok := userIDStr.(int)
+	if !ok {
+		webResponse := web.WebResponse{
+			Code:   500,
+			Status: "INTERNAL SERVER ERROR",
+			Data:   "userID not found in the context",
+		}
+
+		return ctx.Status(fiber.StatusInternalServerError).JSON(webResponse)
+	}
+
 	taskFilterRequest := web.TaskFilterRequest{
 		Status:  (*domain.TaskStatus)(&status),
+		UserID:  userID,
 		DueDate: &dueDateStr,
 	}
 	taskResponse, err := controller.TaskService.FindTasks(ctx.Context(), taskFilterRequest)
@@ -144,7 +157,13 @@ func (controller *TaskControllerImpl) Delete(ctx *fiber.Ctx) error {
 	userIDStr := ctx.Locals("userID")
 	userID, ok := userIDStr.(int)
 	if !ok {
-		return err
+		webResponse := web.WebResponse{
+			Code:   500,
+			Status: "INTERNAL SERVER ERROR",
+			Data:   "userID not found in the context",
+		}
+
+		return ctx.Status(fiber.StatusInternalServerError).JSON(webResponse)
 	}
 
 	err = controller.TaskService.Delete(ctx.Context(), taskID, userID)

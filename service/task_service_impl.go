@@ -90,6 +90,8 @@ func (service *TaskServiceImpl) FindTasks(ctx context.Context, req web.TaskFilte
 		return []web.TaskResponse{}, err
 	}
 
+	taskFilter.UserID = req.UserID
+
 	// if there is query param, we will include it here
 	if req.Status != nil {
 		if *req.Status != "" {

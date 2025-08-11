@@ -7,5 +7,6 @@ import (
 
 type TaskFilter struct {
 	Status  *domain.TaskStatus
+	UserID  int
 	DueDate *time.Time
 }
