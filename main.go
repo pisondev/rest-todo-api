@@ -45,6 +45,7 @@ func main() {
 	taskRoutes.Get("", taskController.FindTasks)
 	taskRoutes.Get("/:taskID", taskController.FindByID)
 	taskRoutes.Patch("/:taskID", taskController.Update)
+	taskRoutes.Delete("/:taskID", taskController.Delete)
 
 	err = server.Listen(":3000")
 	if err != nil {
