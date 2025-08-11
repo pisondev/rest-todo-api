@@ -68,9 +68,12 @@ func (service *TaskServiceImpl) Create(ctx context.Context, req web.TaskCreateRe
 		tx.Rollback()
 		return web.TaskResponse{}, err
 	}
-	createdTask.DueDate = sql.NullTime{
-		Time:  createdTask.DueDate.Time.UTC().Truncate(time.Second),
-		Valid: true,
+	if createdTask.DueDate.Valid {
+		createdTask.DueDate = sql.NullTime{
+			Time:  createdTask.DueDate.Time.UTC().Truncate(time.Second),
+			Valid: true,
+		}
+
 	}
 	createdTask.CreatedAt = createdTask.CreatedAt.UTC().Truncate(time.Second)
 	createdTask.UpdatedAt = createdTask.UpdatedAt.UTC().Truncate(time.Second)
@@ -137,11 +140,12 @@ func (service *TaskServiceImpl) FindByID(ctx context.Context, taskID int, userID
 		}
 		return web.TaskResponse{}, err
 	}
-
-	task.DueDate = sql.NullTime{
-		Time:  task.DueDate.Time.UTC().Truncate(time.Second),
-		Valid: true,
+	if task.DueDate.Valid {
+		task.DueDate = sql.NullTime{
+			Time: task.DueDate.Time.UTC().Truncate(time.Second),
+		}
 	}
+
 	task.CreatedAt = task.CreatedAt.UTC().Truncate(time.Second)
 	task.UpdatedAt = task.UpdatedAt.UTC().Truncate(time.Second)
 
