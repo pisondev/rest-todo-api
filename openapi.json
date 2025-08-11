@@ -387,16 +387,6 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden - You don't have access to this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TaskResponse403"
-                }
-              }
-            }
-          },
           "404": {
             "description": "Task is not found",
             "content": {
@@ -438,7 +428,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TaskResponse200"
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number",
+                      "example": 200
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    }
+                  }
                 }
               }
             }
@@ -449,16 +449,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TaskResponse401"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - You don't have access to this resource",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TaskResponse403"
                 }
               }
             }
@@ -612,23 +602,6 @@
           "data": {
             "type":"string",
             "example": "Invalid or missing token"
-          }
-        }
-      },
-      "TaskResponse403":{
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "number",
-            "example": 403
-          },
-          "status": {
-            "type": "string",
-            "example": "FORBIDDEN"
-          },
-          "data": {
-            "type":"string",
-            "example": "You don't have access to this resource"
           }
         }
       },
