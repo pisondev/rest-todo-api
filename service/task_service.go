@@ -11,4 +11,5 @@ type TaskService interface {
 	FindTasks(ctx context.Context, req web.TaskFilterRequest) ([]web.TaskResponse, error)
 	FindByID(ctx context.Context, taskID int, userID int) (web.TaskResponse, error)
 	Update(ctx context.Context, req web.TaskUpdateRequest) (web.TaskResponse, error)
+	Delete(ctx context.Context, taskID int, userID int) error
 }

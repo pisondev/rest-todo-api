@@ -7,4 +7,5 @@ type TaskController interface {
 	FindTasks(ctx *fiber.Ctx) error
 	FindByID(ctx *fiber.Ctx) error
 	Update(ctx *fiber.Ctx) error
+	Delete(ctx *fiber.Ctx) error
 }

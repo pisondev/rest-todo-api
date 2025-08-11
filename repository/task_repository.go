@@ -11,4 +11,5 @@ type TaskRepository interface {
 	FindTasks(ctx context.Context, tx *sql.Tx, taskFilter TaskFilter) ([]domain.Task, error)
 	FindByID(ctx context.Context, tx *sql.Tx, taskID int, userID int) (domain.Task, error)
 	Update(ctx context.Context, tx *sql.Tx, task domain.Task) (domain.Task, error)
+	Delete(ctx context.Context, tx *sql.Tx, taskID int, userID int) error
 }
