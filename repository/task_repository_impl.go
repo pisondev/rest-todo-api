@@ -63,9 +63,9 @@ func (repository *TaskRepositoryImpl) FindTasks(ctx context.Context, tx *sql.Tx,
 	return tasks, nil
 }
 
-func (repository *TaskRepositoryImpl) FindByID(ctx context.Context, tx *sql.Tx, taskID int) (domain.Task, error) {
-	SQL := "SELECT id, user_id, title, description, status, due_date, created_at, updated_at from tasks WHERE id = ?"
-	rows, err := tx.QueryContext(ctx, SQL, taskID)
+func (repository *TaskRepositoryImpl) FindByID(ctx context.Context, tx *sql.Tx, taskID int, userID int) (domain.Task, error) {
+	SQL := "SELECT id, user_id, title, description, status, due_date, created_at, updated_at from tasks WHERE id = ? AND user_id = ?"
+	rows, err := tx.QueryContext(ctx, SQL, taskID, userID)
 	if err != nil {
 		return domain.Task{}, err
 	}

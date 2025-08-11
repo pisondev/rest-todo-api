@@ -118,12 +118,12 @@ func (service *TaskServiceImpl) FindTasks(ctx context.Context, req web.TaskFilte
 	return helper.ToTaskResponses(tasks), nil
 }
 
-func (service *TaskServiceImpl) FindByID(ctx context.Context, taskID int) (web.TaskResponse, error) {
+func (service *TaskServiceImpl) FindByID(ctx context.Context, taskID int, userID int) (web.TaskResponse, error) {
 	tx, err := service.DB.Begin()
 	if err != nil {
 		return web.TaskResponse{}, err
 	}
-	task, err := service.TaskRepository.FindByID(ctx, tx, taskID)
+	task, err := service.TaskRepository.FindByID(ctx, tx, taskID, userID)
 	if err != nil {
 		errRollback := tx.Rollback()
 		if errRollback != nil {
@@ -150,7 +150,7 @@ func (service *TaskServiceImpl) Update(ctx context.Context, req web.TaskUpdateRe
 		return web.TaskResponse{}, err
 	}
 
-	selectedTask, err := service.TaskRepository.FindByID(ctx, tx, req.ID)
+	selectedTask, err := service.TaskRepository.FindByID(ctx, tx, req.ID, req.UserID)
 	if err != nil {
 		errRollback := tx.Rollback()
 		if errRollback != nil {
@@ -165,6 +165,9 @@ func (service *TaskServiceImpl) Update(ctx context.Context, req web.TaskUpdateRe
 
 	//if even just 1 param was changed, do Update method
 	if (req.Title != nil) || (req.Description != nil) || (req.Status != nil) {
+		if (selectedTask.Title == *req.Title) && (selectedTask.Description == req.Description) && (selectedTask.Status == req.Status) {
+			selectedTask.UpdatedAt = time.Now().UTC().Truncate(time.Second)
+		}
 		if req.Title != nil {
 			selectedTask.Title = *req.Title
 		}
@@ -177,8 +180,6 @@ func (service *TaskServiceImpl) Update(ctx context.Context, req web.TaskUpdateRe
 			}
 			selectedTask.Status = req.Status
 		}
-
-		selectedTask.UpdatedAt = time.Now().UTC().Truncate(time.Second)
 
 		updatedTask, err := service.TaskRepository.Update(ctx, tx, selectedTask)
 		if err != nil {

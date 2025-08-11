@@ -87,7 +87,11 @@ func (controller *TaskControllerImpl) FindByID(ctx *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	taskResponse, err := controller.TaskService.FindByID(ctx.Context(), taskID)
+
+	userIDString := ctx.Locals("userID")
+	userID := userIDString.(int)
+
+	taskResponse, err := controller.TaskService.FindByID(ctx.Context(), taskID, userID)
 	if err != nil {
 		return err
 	}
