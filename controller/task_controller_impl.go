@@ -134,3 +134,28 @@ func (controller *TaskControllerImpl) Update(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusOK).JSON(webResponse)
 }
+
+func (controller *TaskControllerImpl) Delete(ctx *fiber.Ctx) error {
+	taskIDStr := ctx.Params("taskID")
+	taskID, err := strconv.Atoi(taskIDStr)
+	if err != nil {
+		return err
+	}
+	userIDStr := ctx.Locals("userID")
+	userID, ok := userIDStr.(int)
+	if !ok {
+		return err
+	}
+
+	err = controller.TaskService.Delete(ctx.Context(), taskID, userID)
+	if err != nil {
+		return err
+	}
+
+	webResponse := web.WebResponse{
+		Code:   200,
+		Status: "OK",
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(webResponse)
+}

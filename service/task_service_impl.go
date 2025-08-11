@@ -225,3 +225,26 @@ func (service *TaskServiceImpl) Update(ctx context.Context, req web.TaskUpdateRe
 	}
 	return helper.ToTaskResponse(selectedTask), nil
 }
+
+func (service *TaskServiceImpl) Delete(ctx context.Context, taskID int, userID int) error {
+	tx, err := service.DB.Begin()
+	if err != nil {
+		return err
+	}
+
+	err = service.TaskRepository.Delete(ctx, tx, taskID, userID)
+	if err != nil {
+		errRollback := tx.Rollback()
+		if errRollback != nil {
+			return errRollback
+		}
+		return err
+	}
+
+	errCommit := tx.Commit()
+	if errCommit != nil {
+		return errCommit
+	}
+
+	return nil
+}

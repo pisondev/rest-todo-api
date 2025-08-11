@@ -105,3 +105,12 @@ func (repository *TaskRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, ta
 
 	return task, nil
 }
+
+func (repository *TaskRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, taskID int, userID int) error {
+	SQL := "UPDATE tasks SET deleted_at = NOW() WHERE id = ? AND user_id = ?"
+	_, err := tx.ExecContext(ctx, SQL, taskID, userID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
