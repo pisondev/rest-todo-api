@@ -14,6 +14,7 @@ type Task struct {
 	DueDate     sql.NullTime
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+	DeletedAt   sql.NullTime
 }
 
 type TaskStatus string
