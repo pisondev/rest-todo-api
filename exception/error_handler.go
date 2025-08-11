@@ -24,6 +24,10 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 		code = fiber.StatusBadRequest
 		status = "BAD REQUEST"
 	}
+	if errors.Is(err, ErrBadRequestTaskStatus) {
+		code = fiber.StatusBadRequest
+		status = "BAD REQUEST"
+	}
 
 	//401
 	if errors.Is(err, ErrUnauthorized) {

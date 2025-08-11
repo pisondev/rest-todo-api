@@ -172,6 +172,9 @@ func (service *TaskServiceImpl) Update(ctx context.Context, req web.TaskUpdateRe
 			selectedTask.Description = req.Description
 		}
 		if req.Status != nil {
+			if (*req.Status != domain.StatusPending) && (*req.Status != domain.StatusDone) {
+				return web.TaskResponse{}, exception.ErrBadRequestTaskStatus
+			}
 			selectedTask.Status = req.Status
 		}
 

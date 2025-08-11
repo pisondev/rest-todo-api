@@ -7,5 +7,6 @@ var (
 	ErrUnauthorized         = errors.New("invalid or missing token")
 	ErrUnauthorizedLogin    = errors.New("invalid username or password")
 	ErrBadRequestTimeFormat = errors.New("invalid date format, please use rfc 3339")
+	ErrBadRequestTaskStatus = errors.New("invalid status format, please use \"pending\" or \"done\"")
 	ErrNotFoundTask         = errors.New("task is not found")
 )
