@@ -121,7 +121,12 @@ func (controller *TaskControllerImpl) Update(ctx *fiber.Ctx) error {
 	taskUpdateRequest := web.TaskUpdateRequest{}
 	err := ctx.BodyParser(&taskUpdateRequest)
 	if err != nil {
-		return err
+		webResponse := web.WebResponse{
+			Code:   fiber.StatusBadRequest,
+			Status: "BAD REQUEST",
+			Data:   err.Error(),
+		}
+		return ctx.Status(fiber.StatusBadRequest).JSON(webResponse)
 	}
 
 	taskIDStr := ctx.Params("taskID")

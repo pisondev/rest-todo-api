@@ -21,7 +21,12 @@ func (controller *UserControllerImpl) Register(ctx *fiber.Ctx) error {
 	userAuthRequest := web.UserAuthRequest{}
 	err := ctx.BodyParser(&userAuthRequest)
 	if err != nil {
-		return err
+		webResponse := web.WebResponse{
+			Code:   fiber.StatusBadRequest,
+			Status: "BAD REQUEST",
+			Data:   err.Error(),
+		}
+		return ctx.Status(fiber.StatusBadRequest).JSON(webResponse)
 	}
 
 	userResponse, err := controller.UserService.Register(ctx.Context(), userAuthRequest)
@@ -41,8 +46,14 @@ func (controller *UserControllerImpl) Login(ctx *fiber.Ctx) error {
 	userAuthRequest := web.UserAuthRequest{}
 	err := ctx.BodyParser(&userAuthRequest)
 	if err != nil {
-		return err
+		webResponse := web.WebResponse{
+			Code:   fiber.StatusBadRequest,
+			Status: "BAD REQUEST",
+			Data:   err.Error(),
+		}
+		return ctx.Status(fiber.StatusBadRequest).JSON(webResponse)
 	}
+
 	userResponse, err := controller.UserService.Login(ctx.Context(), userAuthRequest)
 	if err != nil {
 		return err
