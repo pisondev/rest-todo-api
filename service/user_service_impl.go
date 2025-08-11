@@ -42,7 +42,7 @@ func (service *UserServiceImpl) Register(ctx context.Context, req web.UserAuthRe
 	}
 
 	_, err = service.UserRepository.FindByUsername(ctx, tx, req.Username)
-	if err != sql.ErrNoRows {
+	if err == sql.ErrNoRows {
 		tx.Rollback()
 		return web.UserResponse{}, exception.ErrConflict
 	}
