@@ -43,6 +43,7 @@ func main() {
 
 	taskRoutes.Post("", taskController.Create)
 	taskRoutes.Get("", taskController.FindTasks)
+	taskRoutes.Get("/:taskID", taskController.FindByID)
 
 	err = server.Listen(":3000")
 	if err != nil {
