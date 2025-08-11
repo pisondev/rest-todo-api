@@ -15,8 +15,8 @@ func NewTaskRepository() TaskRepository {
 }
 
 func (repository *TaskRepositoryImpl) Create(ctx context.Context, tx *sql.Tx, task domain.Task) (domain.Task, error) {
-	SQL := "INSERT INTO tasks(user_id, title, description, status, due_date, created_at, updated_at) VALUES (?,?,?,?,?,?,?)"
-	result, err := tx.ExecContext(ctx, SQL, task.UserID, task.Title, &task.Description, &task.Status, &task.DueDate, task.CreatedAt, task.UpdatedAt)
+	SQL := "INSERT INTO tasks(user_id, title, description, status, due_date) VALUES (?,?,?,?,?)"
+	result, err := tx.ExecContext(ctx, SQL, task.UserID, task.Title, &task.Description, &task.Status, &task.DueDate)
 	if err != nil {
 		return domain.Task{}, err
 	}
@@ -27,6 +27,13 @@ func (repository *TaskRepositoryImpl) Create(ctx context.Context, tx *sql.Tx, ta
 	}
 
 	task.ID = int(id)
+
+	SQLSelect := "SELECT id, user_id, title, description, status, due_date, created_at, updated_at FROM tasks WHERE id = ?"
+	err = tx.QueryRowContext(ctx, SQLSelect, task.ID).Scan(&task.ID, &task.UserID, &task.Title, &task.Description, &task.Status, &task.DueDate, &task.CreatedAt, &task.UpdatedAt)
+	if err != nil {
+		return domain.Task{}, err
+	}
+
 	return task, nil
 }
 
@@ -84,37 +91,17 @@ func (repository *TaskRepositoryImpl) FindByID(ctx context.Context, tx *sql.Tx, 
 }
 
 func (repository *TaskRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, task domain.Task) (domain.Task, error) {
-	SQL := "UPDATE tasks SET title = ?, description = ?, status = ?, updated_at = ? WHERE id = ?"
-	_, err := tx.ExecContext(ctx, SQL, task.Title, task.Description, task.Status, task.UpdatedAt, task.ID)
+	SQL := "UPDATE tasks SET title = ?, description = ?, status = ? WHERE id = ?"
+	_, err := tx.ExecContext(ctx, SQL, task.Title, task.Description, task.Status, task.ID)
 	if err != nil {
 		return domain.Task{}, err
 	}
 
-	// SQL := "UPDATE tasks SET id = id"
-	// var args []any
-	// if task.Title != "" {
-	// 	SQL += ", title = ?"
-	// 	args = append(args, task.Title)
-	// }
-	// if task.Description != nil {
-	// 	if *task.Description != "" {
-	// 		SQL += ", description = ?"
-	// 		args = append(args, task.Description)
-	// 	}
-	// }
-	// if task.Status != nil {
-	// 	if *task.Status != "" {
-	// 		SQL += ", status = ?"
-	// 		args = append(args, task.Status)
-	// 	}
-	// }
-	// SQL += " WHERE id = ?"
-	// args = append(args, task.ID)
-
-	// _, err := tx.QueryContext(ctx, SQL, args...)
-	// if err != nil {
-	// 	return domain.Task{}, err
-	// }
+	SQLSelect := "SELECT id, user_id, title, description, status, due_date, created_at, updated_at FROM tasks WHERE id = ?"
+	err = tx.QueryRowContext(ctx, SQLSelect, task.ID).Scan(&task.ID, &task.UserID, &task.Title, &task.Description, &task.Status, &task.DueDate, &task.CreatedAt, &task.UpdatedAt)
+	if err != nil {
+		return domain.Task{}, err
+	}
 
 	return task, nil
 }

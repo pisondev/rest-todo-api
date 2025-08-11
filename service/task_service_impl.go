@@ -48,8 +48,6 @@ func (service *TaskServiceImpl) Create(ctx context.Context, req web.TaskCreateRe
 		Title:       req.Title,
 		Description: req.Description,
 		Status:      req.Status,
-		CreatedAt:   time.Now().UTC().Truncate(time.Second),
-		UpdatedAt:   time.Now().UTC().Truncate(time.Second),
 	}
 
 	if req.DueDate != nil {
@@ -70,6 +68,12 @@ func (service *TaskServiceImpl) Create(ctx context.Context, req web.TaskCreateRe
 		tx.Rollback()
 		return web.TaskResponse{}, err
 	}
+	createdTask.DueDate = sql.NullTime{
+		Time:  createdTask.DueDate.Time.UTC().Truncate(time.Second),
+		Valid: true,
+	}
+	createdTask.CreatedAt = createdTask.CreatedAt.UTC().Truncate(time.Second)
+	createdTask.UpdatedAt = createdTask.UpdatedAt.UTC().Truncate(time.Second)
 
 	errCommit := tx.Commit()
 	if errCommit != nil {
@@ -132,6 +136,13 @@ func (service *TaskServiceImpl) FindByID(ctx context.Context, taskID int, userID
 		return web.TaskResponse{}, err
 	}
 
+	task.DueDate = sql.NullTime{
+		Time:  task.DueDate.Time.UTC().Truncate(time.Second),
+		Valid: true,
+	}
+	task.CreatedAt = task.CreatedAt.UTC().Truncate(time.Second)
+	task.UpdatedAt = task.UpdatedAt.UTC().Truncate(time.Second)
+
 	errCommit := tx.Commit()
 	if errCommit != nil {
 		return web.TaskResponse{}, errCommit
@@ -163,11 +174,15 @@ func (service *TaskServiceImpl) Update(ctx context.Context, req web.TaskUpdateRe
 		return web.TaskResponse{}, exception.ErrUnauthorized
 	}
 
+	selectedTask.DueDate = sql.NullTime{
+		Time:  selectedTask.DueDate.Time.UTC().Truncate(time.Second),
+		Valid: true,
+	}
+	selectedTask.CreatedAt = selectedTask.CreatedAt.UTC().Truncate(time.Second)
+	selectedTask.UpdatedAt = selectedTask.UpdatedAt.UTC().Truncate(time.Second)
+
 	//if even just 1 param was changed, do Update method
 	if (req.Title != nil) || (req.Description != nil) || (req.Status != nil) {
-		if (selectedTask.Title == *req.Title) && (selectedTask.Description == req.Description) && (selectedTask.Status == req.Status) {
-			selectedTask.UpdatedAt = time.Now().UTC().Truncate(time.Second)
-		}
 		if req.Title != nil {
 			selectedTask.Title = *req.Title
 		}
@@ -189,6 +204,14 @@ func (service *TaskServiceImpl) Update(ctx context.Context, req web.TaskUpdateRe
 			}
 			return web.TaskResponse{}, err
 		}
+
+		updatedTask.DueDate = sql.NullTime{
+			Time:  updatedTask.DueDate.Time.UTC().Truncate(time.Second),
+			Valid: true,
+		}
+		updatedTask.CreatedAt = updatedTask.CreatedAt.UTC().Truncate(time.Second)
+		updatedTask.UpdatedAt = updatedTask.UpdatedAt.UTC().Truncate(time.Second)
+
 		errCommit := tx.Commit()
 		if errCommit != nil {
 			return web.TaskResponse{}, errCommit
