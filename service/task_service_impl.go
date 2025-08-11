@@ -138,3 +138,63 @@ func (service *TaskServiceImpl) FindByID(ctx context.Context, taskID int) (web.T
 	}
 	return helper.ToTaskResponse(task), nil
 }
+
+func (service *TaskServiceImpl) Update(ctx context.Context, req web.TaskUpdateRequest) (web.TaskResponse, error) {
+	err := service.Validate.Struct(req)
+	if err != nil {
+		return web.TaskResponse{}, err
+	}
+
+	tx, err := service.DB.Begin()
+	if err != nil {
+		return web.TaskResponse{}, err
+	}
+
+	selectedTask, err := service.TaskRepository.FindByID(ctx, tx, req.ID)
+	if err != nil {
+		errRollback := tx.Rollback()
+		if errRollback != nil {
+			return web.TaskResponse{}, errRollback
+		}
+		return web.TaskResponse{}, err
+	}
+
+	if selectedTask.UserID != req.UserID {
+		return web.TaskResponse{}, exception.ErrUnauthorized
+	}
+
+	//if even just 1 param was changed, do Update method
+	if (req.Title != nil) || (req.Description != nil) || (req.Status != nil) {
+		if req.Title != nil {
+			selectedTask.Title = *req.Title
+		}
+		if req.Description != nil {
+			selectedTask.Description = req.Description
+		}
+		if req.Status != nil {
+			selectedTask.Status = req.Status
+		}
+
+		selectedTask.UpdatedAt = time.Now().UTC().Truncate(time.Second)
+
+		updatedTask, err := service.TaskRepository.Update(ctx, tx, selectedTask)
+		if err != nil {
+			errRollback := tx.Rollback()
+			if errRollback != nil {
+				return web.TaskResponse{}, errRollback
+			}
+			return web.TaskResponse{}, err
+		}
+		errCommit := tx.Commit()
+		if errCommit != nil {
+			return web.TaskResponse{}, errCommit
+		}
+		return helper.ToTaskResponse(updatedTask), nil
+	}
+
+	errCommit := tx.Commit()
+	if errCommit != nil {
+		return web.TaskResponse{}, errCommit
+	}
+	return helper.ToTaskResponse(selectedTask), nil
+}

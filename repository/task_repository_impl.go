@@ -82,3 +82,39 @@ func (repository *TaskRepositoryImpl) FindByID(ctx context.Context, tx *sql.Tx, 
 		return task, exception.ErrNotFoundTask
 	}
 }
+
+func (repository *TaskRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, task domain.Task) (domain.Task, error) {
+	SQL := "UPDATE tasks SET title = ?, description = ?, status = ?, updated_at = ? WHERE id = ?"
+	_, err := tx.ExecContext(ctx, SQL, task.Title, task.Description, task.Status, task.UpdatedAt, task.ID)
+	if err != nil {
+		return domain.Task{}, err
+	}
+
+	// SQL := "UPDATE tasks SET id = id"
+	// var args []any
+	// if task.Title != "" {
+	// 	SQL += ", title = ?"
+	// 	args = append(args, task.Title)
+	// }
+	// if task.Description != nil {
+	// 	if *task.Description != "" {
+	// 		SQL += ", description = ?"
+	// 		args = append(args, task.Description)
+	// 	}
+	// }
+	// if task.Status != nil {
+	// 	if *task.Status != "" {
+	// 		SQL += ", status = ?"
+	// 		args = append(args, task.Status)
+	// 	}
+	// }
+	// SQL += " WHERE id = ?"
+	// args = append(args, task.ID)
+
+	// _, err := tx.QueryContext(ctx, SQL, args...)
+	// if err != nil {
+	// 	return domain.Task{}, err
+	// }
+
+	return task, nil
+}

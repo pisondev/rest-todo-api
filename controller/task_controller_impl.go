@@ -99,3 +99,34 @@ func (controller *TaskControllerImpl) FindByID(ctx *fiber.Ctx) error {
 	}
 	return ctx.Status(fiber.StatusOK).JSON(webResponse)
 }
+
+func (controller *TaskControllerImpl) Update(ctx *fiber.Ctx) error {
+	taskUpdateRequest := web.TaskUpdateRequest{}
+	err := ctx.BodyParser(&taskUpdateRequest)
+	if err != nil {
+		return err
+	}
+
+	taskIDStr := ctx.Params("taskID")
+	taskID, err := strconv.Atoi(taskIDStr)
+	if err != nil {
+		return err
+	}
+	taskUpdateRequest.ID = taskID
+
+	userID := ctx.Locals("userID")
+	taskUpdateRequest.UserID = userID.(int)
+
+	taskResponse, err := controller.TaskService.Update(ctx.Context(), taskUpdateRequest)
+	if err != nil {
+		return err
+	}
+
+	webResponse := web.WebResponse{
+		Code:   200,
+		Status: "OK",
+		Data:   taskResponse,
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(webResponse)
+}
