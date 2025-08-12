@@ -53,7 +53,7 @@ func (repository *TaskRepositoryImpl) FindTasks(ctx context.Context, tx *sql.Tx,
 		}
 	}
 
-	SQL += " AND user_id = ?"
+	SQL += " AND user_id = ? AND deleted_at IS NULL"
 	args = append(args, taskFilter.UserID)
 
 	rows, err := tx.QueryContext(ctx, SQL, args...)
@@ -75,7 +75,7 @@ func (repository *TaskRepositoryImpl) FindTasks(ctx context.Context, tx *sql.Tx,
 }
 
 func (repository *TaskRepositoryImpl) FindByID(ctx context.Context, tx *sql.Tx, taskID int, userID int) (domain.Task, error) {
-	SQL := "SELECT id, user_id, title, description, status, due_date, created_at, updated_at from tasks WHERE id = ? AND user_id = ?"
+	SQL := "SELECT id, user_id, title, description, status, due_date, created_at, updated_at from tasks WHERE id = ? AND user_id = ? AND deleted_at IS NULL"
 	rows, err := tx.QueryContext(ctx, SQL, taskID, userID)
 	if err != nil {
 		return domain.Task{}, err
@@ -95,13 +95,13 @@ func (repository *TaskRepositoryImpl) FindByID(ctx context.Context, tx *sql.Tx, 
 }
 
 func (repository *TaskRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, task domain.Task) (domain.Task, error) {
-	SQL := "UPDATE tasks SET title = ?, description = ?, status = ? WHERE id = ?"
+	SQL := "UPDATE tasks SET title = ?, description = ?, status = ? WHERE id = ? AND deleted_at IS NULL"
 	_, err := tx.ExecContext(ctx, SQL, task.Title, task.Description, task.Status, task.ID)
 	if err != nil {
 		return domain.Task{}, err
 	}
 
-	SQLSelect := "SELECT id, user_id, title, description, status, due_date, created_at, updated_at FROM tasks WHERE id = ?"
+	SQLSelect := "SELECT id, user_id, title, description, status, due_date, created_at, updated_at FROM tasks WHERE id = ? AND deleted_at IS NULL"
 	err = tx.QueryRowContext(ctx, SQLSelect, task.ID).Scan(&task.ID, &task.UserID, &task.Title, &task.Description, &task.Status, &task.DueDate, &task.CreatedAt, &task.UpdatedAt)
 	if err != nil {
 		return domain.Task{}, err
