@@ -27,12 +27,24 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Successfully registered a user",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthResponse200"
+                  "type":"object",
+                  "properties": {
+                    "id":{
+                      "type":"number"
+                    },
+                    "username":{
+                      "type":"string"
+                    },
+                    "createdAt":{
+                      "type":"string",
+                      "format": "date-time"
+                    }
+                  }
                 }
               }
             }
@@ -91,7 +103,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthResponse200"
+                  "type":"object",
+                  "properties": {
+                    "token":{
+                      "type":"string"
+                    }
+                  }
                 }
               }
             }
@@ -141,20 +158,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number",
-                      "example": 201
-                    },
-                    "status": {
-                      "type": "string",
-                      "example": "Created"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/Task"
-                    }
-                  }
+                  "$ref":"#/components/schemas/Task"
                 }
               }
             }
@@ -194,7 +198,7 @@
       "get": {
         "tags": ["Task API"],
         "summary": "Find tasks by filter",
-        "description": "Find all tasks from the database by filter (status, due_date). If param is empty, retrieved all tasks.",
+        "description": "Find all tasks from the database by filter (status, dueDate). If param is empty, retrieved all tasks.",
         "security": [{"bearerAuth":[]}],
         "parameters": [
           {
@@ -207,7 +211,7 @@
             }
           },
           {
-            "name": "due_date",
+            "name": "dueDate",
             "in": "query",
             "required": false,
             "schema": {
@@ -222,22 +226,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "integer",
-                      "example": 200
-                    },
-                    "status": {
-                      "type": "string",
-                      "example": "OK"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Task"
-                      }
-                    }
+                  "type":"array",
+                  "items":{
+                    "$ref": "#/components/schemas/Task"
                   }
                 }
               }
@@ -296,7 +287,7 @@
             "content": {
               "application/json": {
                 "schema":{
-                  "$ref": "#/components/schemas/TaskResponse200"
+                  "$ref": "#/components/schemas/Task"
                 }
               }
             }
@@ -312,7 +303,7 @@
             }
           },
           "404": {
-            "description": "Task is not found",
+            "description": "Not found — Task is not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -362,7 +353,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TaskResponse200"
+                  "$ref": "#/components/schemas/Task"
                 }
               }
             }
@@ -388,7 +379,7 @@
             }
           },
           "404": {
-            "description": "Task is not found",
+            "description": "Not found — Task is not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -454,7 +445,7 @@
             }
           },
           "404": {
-            "description": "Task is not found",
+            "description": "Not found — Task is not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -492,6 +483,9 @@
           "id": {
             "type": "number"
           },
+          "userId": {
+            "type": "number"
+          },
           "title": {
             "type": "string"
           },
@@ -502,19 +496,19 @@
             "type": "string",
             "examples": ["pending"]
           },
-          "due_date": {
+          "dueDate": {
             "type": "string",
             "format": "date-time",
             "description": "a date with UTC format",
             "example": "2025-08-06T06:43:34Z"
           },
-          "created_at": {
+          "createdAt": {
             "type": "string",
             "format": "date-time",
             "description": "a date with UTC format",
             "example": "2025-08-06T06:43:34Z"
           },
-          "updated_at": {
+          "updatedAt": {
             "type": "string",
             "format": "date-time",
             "description": "a date with UTC format",
@@ -538,7 +532,7 @@
             "type": "string",
             "enum": ["pending", "done"]
           },
-          "due_date": {
+          "dueDate": {
             "type": "string",
             "format": "date-time",
             "example": "2025-08-06T06:43:34Z"
@@ -555,22 +549,6 @@
         "allOf": [
           {"$ref":"#/components/schemas/TaskRequest"}
         ]      
-      },
-      "TaskResponse200":{
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "number",
-            "example": 200
-          },
-          "status": {
-            "type": "string",
-            "example": "OK"
-          },
-          "data": {
-            "$ref": "#/components/schemas/Task"
-          }
-        }
       },
       "TaskResponse400":{
         "type": "object",
@@ -601,7 +579,7 @@
           },
           "data": {
             "type":"string",
-            "example": "Invalid or missing token"
+            "example": "string"
           }
         }
       },
@@ -654,27 +632,6 @@
           }
         }
       },
-      "AuthResponse200":{
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "number",
-            "example": 200
-          },
-          "status": {
-            "type": "string",
-            "example": "OK"
-          },
-          "data": {
-            "type":"object",
-            "properties": {
-              "username": {
-                "type":"string"
-              }
-            }
-          }
-        }
-      },   
       "AuthResponse409":{
         "type": "object",
         "properties": {
