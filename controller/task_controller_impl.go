@@ -50,13 +50,7 @@ func (controller *TaskControllerImpl) Create(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	webResponse := web.WebResponse{
-		Code:   201,
-		Status: "Created",
-		Data:   taskResponse,
-	}
-
-	return ctx.Status(fiber.StatusCreated).JSON(webResponse)
+	return ctx.Status(fiber.StatusCreated).JSON(taskResponse)
 }
 
 func (controller *TaskControllerImpl) FindTasks(ctx *fiber.Ctx) error {
@@ -80,18 +74,12 @@ func (controller *TaskControllerImpl) FindTasks(ctx *fiber.Ctx) error {
 		UserID:  userID,
 		DueDate: &dueDateStr,
 	}
-	taskResponse, err := controller.TaskService.FindTasks(ctx.Context(), taskFilterRequest)
+	taskResponses, err := controller.TaskService.FindTasks(ctx.Context(), taskFilterRequest)
 	if err != nil {
 		return err
 	}
 
-	webResponse := web.WebResponse{
-		Code:   200,
-		Status: "OK",
-		Data:   taskResponse,
-	}
-
-	return ctx.Status(fiber.StatusOK).JSON(webResponse)
+	return ctx.Status(fiber.StatusOK).JSON(taskResponses)
 }
 
 func (controller *TaskControllerImpl) FindByID(ctx *fiber.Ctx) error {
@@ -109,12 +97,7 @@ func (controller *TaskControllerImpl) FindByID(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	webResponse := web.WebResponse{
-		Code:   200,
-		Status: "OK",
-		Data:   taskResponse,
-	}
-	return ctx.Status(fiber.StatusOK).JSON(webResponse)
+	return ctx.Status(fiber.StatusOK).JSON(taskResponse)
 }
 
 func (controller *TaskControllerImpl) Update(ctx *fiber.Ctx) error {
@@ -144,13 +127,7 @@ func (controller *TaskControllerImpl) Update(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	webResponse := web.WebResponse{
-		Code:   200,
-		Status: "OK",
-		Data:   taskResponse,
-	}
-
-	return ctx.Status(fiber.StatusOK).JSON(webResponse)
+	return ctx.Status(fiber.StatusOK).JSON(taskResponse)
 }
 
 func (controller *TaskControllerImpl) Delete(ctx *fiber.Ctx) error {
