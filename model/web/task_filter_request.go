@@ -5,7 +5,7 @@ import (
 )
 
 type TaskFilterRequest struct {
-	UserID  int                `json:"user_id"`
+	UserID  int                `json:"userId"`
 	Status  *domain.TaskStatus `form:"status"`
-	DueDate *string            `form:"due_date"`
+	DueDate *string            `form:"dueDate"`
 }

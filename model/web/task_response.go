@@ -7,11 +7,11 @@ import (
 
 type TaskResponse struct {
 	ID          int                `json:"id"`
-	UserID      int                `json:"user_id"`
+	UserID      int                `json:"userId"`
 	Title       string             `json:"title"`
 	Description *string            `json:"description"`
 	Status      *domain.TaskStatus `json:"status"`
-	DueDate     *time.Time         `json:"due_date"`
-	CreatedAt   time.Time          `json:"created_at"`
-	UpdatedAt   time.Time          `json:"updated_at"`
+	DueDate     *time.Time         `json:"dueDate"`
+	CreatedAt   time.Time          `json:"createdAt"`
+	UpdatedAt   time.Time          `json:"updatedAt"`
 }
