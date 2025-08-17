@@ -54,10 +54,5 @@ func (controller *UserControllerImpl) Login(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	webResponse := web.WebResponse{
-		Code:   200,
-		Status: "OK",
-		Data:   userResponse,
-	}
-	return ctx.Status(fiber.StatusOK).JSON(webResponse)
+	return ctx.Status(fiber.StatusOK).JSON(userResponse)
 }
