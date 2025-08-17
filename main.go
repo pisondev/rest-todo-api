@@ -12,6 +12,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
+
+	// NEW: Import the CORS middleware for Fiber
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 )
 
@@ -35,6 +38,13 @@ func main() {
 	server := fiber.New(fiber.Config{
 		ErrorHandler: exception.ErrorHandler,
 	})
+
+	server.Use(cors.New(cors.Config{
+		AllowOrigins:     "http://localhost:5173",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowMethods:     "GET, POST, PATCH, DELETE",
+		AllowCredentials: true,
+	}))
 
 	server.Post("/api/register", userController.Register)
 	server.Post("/api/login", userController.Login)
