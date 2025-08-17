@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"rest-todo-api/app"
 	"rest-todo-api/controller"
 	"rest-todo-api/exception"
@@ -23,6 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	serverPort := os.Getenv("SERVER_PORT")
 
 	db := app.NewDB()
 	validate := validator.New()
@@ -57,7 +59,7 @@ func main() {
 	taskRoutes.Patch("/:taskID", taskController.Update)
 	taskRoutes.Delete("/:taskID", taskController.Delete)
 
-	err = server.Listen(":3000")
+	err = server.Listen(serverPort)
 	if err != nil {
 		panic(err)
 	}
