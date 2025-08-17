@@ -25,6 +25,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	serverPort := os.Getenv("SERVER_PORT")
+	allowedOrigin := os.Getenv("ALLOWED_ORIGIN")
 
 	db := app.NewDB()
 	validate := validator.New()
@@ -42,7 +43,7 @@ func main() {
 	})
 
 	server.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:5173",
+		AllowOrigins:     allowedOrigin,
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowMethods:     "GET, POST, PATCH, DELETE",
 		AllowCredentials: true,
