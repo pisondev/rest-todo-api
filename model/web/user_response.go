@@ -3,7 +3,7 @@ package web
 import "time"
 
 type UserResponse struct {
-	Id        int
-	Username  string
-	CreatedAt time.Time
+	Id        int       `json:"id"`
+	Username  string    `json:"username"`
+	CreatedAt time.Time `json:"createdAt"`
 }

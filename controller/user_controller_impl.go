@@ -33,13 +33,8 @@ func (controller *UserControllerImpl) Register(ctx *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	webResponse := web.WebResponse{
-		Code:   201,
-		Status: "Created",
-		Data:   userResponse,
-	}
 
-	return ctx.Status(fiber.StatusCreated).JSON(webResponse)
+	return ctx.Status(fiber.StatusCreated).JSON(userResponse)
 }
 
 func (controller *UserControllerImpl) Login(ctx *fiber.Ctx) error {
