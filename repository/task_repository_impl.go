@@ -103,8 +103,8 @@ func (repository *TaskRepositoryImpl) FindByID(ctx context.Context, tx *sql.Tx, 
 }
 
 func (repository *TaskRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, task domain.Task) (domain.Task, error) {
-	SQL := "UPDATE tasks SET title = ?, description = ?, status = ? WHERE id = ? AND deleted_at IS NULL"
-	_, err := tx.ExecContext(ctx, SQL, task.Title, task.Description, task.Status, task.ID)
+	SQL := "UPDATE tasks SET title = ?, description = ?, status = ?, due_date = ? WHERE id = ? AND deleted_at IS NULL"
+	_, err := tx.ExecContext(ctx, SQL, task.Title, task.Description, task.Status, task.DueDate, task.ID)
 	if err != nil {
 		return domain.Task{}, err
 	}

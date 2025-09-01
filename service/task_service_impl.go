@@ -203,7 +203,7 @@ func (service *TaskServiceImpl) Update(ctx context.Context, req web.TaskUpdateRe
 	selectedTask.UpdatedAt = selectedTask.UpdatedAt.UTC().Truncate(time.Second)
 
 	//if even just 1 param was changed, do Update method
-	if (req.Title != nil) || (req.Description != nil) || (req.Status != nil) {
+	if (req.Title != nil) || (req.Description != nil) || (req.Status != nil) || (req.DueDate != nil) {
 		if req.Title != nil {
 			selectedTask.Title = *req.Title
 		}
@@ -215,6 +215,18 @@ func (service *TaskServiceImpl) Update(ctx context.Context, req web.TaskUpdateRe
 				return web.TaskResponse{}, exception.ErrBadRequestTaskStatus
 			}
 			selectedTask.Status = req.Status
+		}
+		if req.DueDate != nil {
+			if *req.DueDate != "" {
+				parsedTime, err := time.Parse(time.RFC3339, *req.DueDate)
+				if err != nil {
+					return web.TaskResponse{}, exception.ErrBadRequestTimeFormat
+				}
+				selectedTask.DueDate = sql.NullTime{
+					Time:  parsedTime,
+					Valid: true,
+				}
+			}
 		}
 
 		updatedTask, err := service.TaskRepository.Update(ctx, tx, selectedTask)
