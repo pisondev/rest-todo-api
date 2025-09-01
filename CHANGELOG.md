@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/pisondev/rest-todo-api/compare/v1.1.0...v1.1.1) (2025-09-01)
+
+
+### Bug Fixes
+
+* ensure dueDate.Valid attribute is false if it is nil ([a503485](https://github.com/pisondev/rest-todo-api/commit/a503485fb36c2247b88437668fdb72a4e5bb20c2))
+
 ## [1.1.0](https://github.com/pisondev/rest-todo-api/compare/v1.0.0...v1.1.0) (2025-09-01)
 
 
