@@ -227,6 +227,10 @@ func (service *TaskServiceImpl) Update(ctx context.Context, req web.TaskUpdateRe
 					Valid: true,
 				}
 			}
+		} else {
+			selectedTask.DueDate = sql.NullTime{
+				Valid: false,
+			}
 		}
 
 		updatedTask, err := service.TaskRepository.Update(ctx, tx, selectedTask)
