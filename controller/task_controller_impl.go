@@ -7,15 +7,18 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/sirupsen/logrus"
 )
 
 type TaskControllerImpl struct {
 	TaskService service.TaskService
+	Logger      *logrus.Logger
 }
 
-func NewTaskController(taskService service.TaskService) TaskController {
+func NewTaskController(taskService service.TaskService, logger *logrus.Logger) TaskController {
 	return &TaskControllerImpl{
 		TaskService: taskService,
+		Logger:      logger,
 	}
 }
 
@@ -54,6 +57,7 @@ func (controller *TaskControllerImpl) Create(ctx *fiber.Ctx) error {
 }
 
 func (controller *TaskControllerImpl) FindTasks(ctx *fiber.Ctx) error {
+	controller.Logger.Info("-----START CONTROLLER LAYER-----")
 	status := ctx.Query("status")
 	dueDateStr := ctx.Query("due_date")
 
@@ -65,7 +69,7 @@ func (controller *TaskControllerImpl) FindTasks(ctx *fiber.Ctx) error {
 			Status: "INTERNAL SERVER ERROR",
 			Data:   "userID not found in the context",
 		}
-
+		controller.Logger.Info("-----END CONTROLLER LAYER-----")
 		return ctx.Status(fiber.StatusInternalServerError).JSON(webResponse)
 	}
 
@@ -74,11 +78,15 @@ func (controller *TaskControllerImpl) FindTasks(ctx *fiber.Ctx) error {
 		UserID:  userID,
 		DueDate: &dueDateStr,
 	}
+
 	taskResponses, err := controller.TaskService.FindTasks(ctx.Context(), taskFilterRequest)
 	if err != nil {
+		controller.Logger.Errorf("failed to use FindTasks Service: %v", err)
+		controller.Logger.Info("-----END CONTROLLER LAYER-----")
 		return err
 	}
 
+	controller.Logger.Info("-----END CONTROLLER LAYER-----")
 	return ctx.Status(fiber.StatusOK).JSON(taskResponses)
 }
 

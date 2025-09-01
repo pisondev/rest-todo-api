@@ -5,15 +5,18 @@ import (
 	"rest-todo-api/service"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/sirupsen/logrus"
 )
 
 type UserControllerImpl struct {
 	UserService service.UserService
+	Logger      *logrus.Logger
 }
 
-func NewUserController(userService service.UserService) UserController {
+func NewUserController(userService service.UserService, logger *logrus.Logger) UserController {
 	return &UserControllerImpl{
 		UserService: userService,
+		Logger:      logger,
 	}
 }
 
@@ -31,6 +34,7 @@ func (controller *UserControllerImpl) Register(ctx *fiber.Ctx) error {
 
 	userResponse, err := controller.UserService.Register(ctx.Context(), userAuthRequest)
 	if err != nil {
+		controller.Logger.Errorf("failed to use register service: %v", err)
 		return err
 	}
 
