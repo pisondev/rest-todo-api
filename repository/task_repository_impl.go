@@ -67,7 +67,7 @@ func (repository *TaskRepositoryImpl) FindTasks(ctx context.Context, tx *sql.Tx,
 	}
 	defer rows.Close()
 
-	var tasks []domain.Task
+	tasks := make([]domain.Task, 0)
 	for rows.Next() {
 		task := domain.Task{}
 		err := rows.Scan(&task.ID, &task.UserID, &task.Title, &task.Description, &task.Status, &task.DueDate, &task.CreatedAt, &task.UpdatedAt)
