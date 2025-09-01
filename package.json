@@ -1,0 +1,25 @@
+{
+  "name": "rest-todo-api",
+  "version": "1.1.0",
+  "description": "A simple RESTful API for managing a personal to-do list. Built with Go and MySQL, it supports full CRUD functionality and JWT for user authentication.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "standard-version"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pisondev/rest-todo-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/pisondev/rest-todo-api/issues"
+  },
+  "homepage": "https://github.com/pisondev/rest-todo-api#readme",
+  "devDependencies": {
+    "standard-version": "^9.5.0"
+  }
+}
