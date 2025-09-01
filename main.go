@@ -13,6 +13,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
+	"github.com/sirupsen/logrus"
 
 	// NEW: Import the CORS middleware for Fiber
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -20,6 +21,7 @@ import (
 )
 
 func main() {
+	logger := logrus.New()
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -30,13 +32,13 @@ func main() {
 	db := app.NewDB()
 	validate := validator.New()
 
-	userRepository := repository.NewUserRepository()
-	userService := service.NewUserService(userRepository, db, validate)
-	userController := controller.NewUserController(userService)
+	userRepository := repository.NewUserRepository(logger)
+	userService := service.NewUserService(userRepository, db, validate, logger)
+	userController := controller.NewUserController(userService, logger)
 
-	taskRepository := repository.NewTaskRepository()
-	taskService := service.NewTaskService(taskRepository, db, validate)
-	taskController := controller.NewTaskController(taskService)
+	taskRepository := repository.NewTaskRepository(logger)
+	taskService := service.NewTaskService(taskRepository, db, validate, logger)
+	taskController := controller.NewTaskController(taskService, logger)
 
 	server := fiber.New(fiber.Config{
 		ErrorHandler: exception.ErrorHandler,
