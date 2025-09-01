@@ -51,6 +51,10 @@ func (repository *UserRepositoryImpl) FindByUsername(ctx context.Context, tx *sq
 			repository.Logger.Errorf("failed to scan row:%v", err)
 			return domain.User{}, err
 		}
+	} else {
+		err = sql.ErrNoRows
+		repository.Logger.Errorf("no next result row or an error happened while preparing rows.Next: %v", err)
+		return domain.User{}, err
 	}
 
 	repository.Logger.Infof("final error: %v", err)
