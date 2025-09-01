@@ -33,7 +33,7 @@ func ToTaskResponse(task domain.Task) web.TaskResponse {
 }
 
 func ToTaskResponses(tasks []domain.Task) []web.TaskResponse {
-	var taskResponses []web.TaskResponse
+	taskResponses := make([]web.TaskResponse, 0)
 	for _, task := range tasks {
 		task.DueDate = sql.NullTime{
 			Time:  task.DueDate.Time.UTC().Truncate(time.Second),
