@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -20,17 +21,20 @@ type UserServiceImpl struct {
 	UserRepository repository.UserRepository
 	DB             *sql.DB
 	Validate       *validator.Validate
+	Logger         *logrus.Logger
 }
 
-func NewUserService(userRepository repository.UserRepository, DB *sql.DB, validate *validator.Validate) UserService {
+func NewUserService(userRepository repository.UserRepository, DB *sql.DB, validate *validator.Validate, logger *logrus.Logger) UserService {
 	return &UserServiceImpl{
 		UserRepository: userRepository,
 		DB:             DB,
 		Validate:       validate,
+		Logger:         logger,
 	}
 }
 
 func (service *UserServiceImpl) Register(ctx context.Context, req web.UserAuthRequest) (web.UserResponse, error) {
+	service.Logger.Info("-----START SERVICE LAYER-----")
 	err := service.Validate.Struct(req)
 	if err != nil {
 		return web.UserResponse{}, err
@@ -40,15 +44,24 @@ func (service *UserServiceImpl) Register(ctx context.Context, req web.UserAuthRe
 	if err != nil {
 		return web.UserResponse{}, err
 	}
-
+	service.Logger.Infof("calling FindByUsername. Error: %v", err)
 	_, err = service.UserRepository.FindByUsername(ctx, tx, req.Username)
+	service.Logger.Infof("FindByUsername has done. Error: %v", err)
 	if err != sql.ErrNoRows {
-		tx.Rollback()
+		service.Logger.Error("username already exist")
+		service.Logger.Info("rollback tx")
+		errRollback := tx.Rollback()
+		if errRollback != nil {
+			service.Logger.Errorf("failed to rollback tx: %v", errRollback)
+			return web.UserResponse{}, errRollback
+		}
 		return web.UserResponse{}, exception.ErrConflict
 	}
 
+	service.Logger.Info("generate hash from password")
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
+		service.Logger.Errorf("failed to generate from password: %v", err)
 		return web.UserResponse{}, err
 	}
 
@@ -58,17 +71,29 @@ func (service *UserServiceImpl) Register(ctx context.Context, req web.UserAuthRe
 		CreatedAt:      time.Now().UTC().Truncate(time.Second),
 	}
 
+	service.Logger.Info("call Save Repository")
 	savedUser, err := service.UserRepository.Save(ctx, tx, user)
 	if err != nil {
-		tx.Rollback()
+		service.Logger.Errorf("failed to use Save Repository: %v", err)
+		service.Logger.Info("rollback tx")
+		errRollback := tx.Rollback()
+		if errRollback != nil {
+			service.Logger.Errorf("failed to rollback tx: %v", errRollback)
+			return web.UserResponse{}, errRollback
+		}
+
 		return web.UserResponse{}, err
 	}
 
+	service.Logger.Info("commit tx")
 	errCommit := tx.Commit()
 	if errCommit != nil {
+		service.Logger.Errorf("failed to commit tx: %v", errCommit)
 		return web.UserResponse{}, errCommit
 	}
 
+	service.Logger.Info("return nil for error")
+	service.Logger.Info("-----END SERVICE LAYER-----")
 	return helper.ToUserResponse(savedUser), nil
 }
 

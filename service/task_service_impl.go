@@ -11,19 +11,22 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/sirupsen/logrus"
 )
 
 type TaskServiceImpl struct {
 	TaskRepository repository.TaskRepository
 	DB             *sql.DB
 	Validate       *validator.Validate
+	Logger         *logrus.Logger
 }
 
-func NewTaskService(taskRepository repository.TaskRepository, DB *sql.DB, validate *validator.Validate) TaskService {
+func NewTaskService(taskRepository repository.TaskRepository, DB *sql.DB, validate *validator.Validate, logger *logrus.Logger) TaskService {
 	return &TaskServiceImpl{
 		TaskRepository: taskRepository,
 		DB:             DB,
 		Validate:       validate,
+		Logger:         logger,
 	}
 }
 
@@ -87,9 +90,11 @@ func (service *TaskServiceImpl) Create(ctx context.Context, req web.TaskCreateRe
 }
 
 func (service *TaskServiceImpl) FindTasks(ctx context.Context, req web.TaskFilterRequest) ([]web.TaskResponse, error) {
+	service.Logger.Infof("-----START SERVICE LAYER-----")
 	taskFilter := repository.TaskFilter{}
 	tx, err := service.DB.Begin()
 	if err != nil {
+		service.Logger.Errorf("failed to begin tx: %v", err)
 		return []web.TaskResponse{}, err
 	}
 
@@ -98,14 +103,17 @@ func (service *TaskServiceImpl) FindTasks(ctx context.Context, req web.TaskFilte
 	// if there is query param, we will include it here
 	if req.Status != nil {
 		if *req.Status != "" {
+			service.Logger.Info("req.Status is not nil or empty value. Now it filled with status filter")
 			taskFilter.Status = req.Status
 		}
 	}
 
 	if req.DueDate != nil {
 		if *req.DueDate != "" {
+			service.Logger.Info("req.DueDate is not nil or empty value. Now it parsed to RFC3339")
 			dueDate, err := time.Parse(time.RFC3339, *req.DueDate)
 			if err != nil {
+				service.Logger.Errorf("failed to parse due date: %v", err)
 				return []web.TaskResponse{}, exception.ErrBadRequestTimeFormat
 			}
 
@@ -115,15 +123,22 @@ func (service *TaskServiceImpl) FindTasks(ctx context.Context, req web.TaskFilte
 
 	tasks, err := service.TaskRepository.FindTasks(ctx, tx, taskFilter)
 	if err != nil {
-		tx.Rollback()
+		service.Logger.Errorf("failed to use findTasks: %v\nrollback tx", err)
+		errRollback := tx.Rollback()
+		if errRollback != nil {
+			service.Logger.Errorf("failed to rollback tx: %v", err)
+			return []web.TaskResponse{}, errRollback
+		}
 		return []web.TaskResponse{}, err
 	}
 
 	errCommit := tx.Commit()
 	if errCommit != nil {
+		service.Logger.Errorf("failed to commit tx: %v", err)
 		return []web.TaskResponse{}, errCommit
 	}
 
+	service.Logger.Infof("-----END SERVICE LAYER-----")
 	return helper.ToTaskResponses(tasks), nil
 }
 
