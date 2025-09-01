@@ -5,13 +5,16 @@ import (
 	"database/sql"
 	"rest-todo-api/exception"
 	"rest-todo-api/model/domain"
+
+	"github.com/sirupsen/logrus"
 )
 
 type TaskRepositoryImpl struct {
+	Logger *logrus.Logger
 }
 
-func NewTaskRepository() TaskRepository {
-	return &TaskRepositoryImpl{}
+func NewTaskRepository(logger *logrus.Logger) TaskRepository {
+	return &TaskRepositoryImpl{Logger: logger}
 }
 
 func (repository *TaskRepositoryImpl) Create(ctx context.Context, tx *sql.Tx, task domain.Task) (domain.Task, error) {
@@ -56,8 +59,10 @@ func (repository *TaskRepositoryImpl) FindTasks(ctx context.Context, tx *sql.Tx,
 	SQL += " AND user_id = ? AND deleted_at IS NULL"
 	args = append(args, taskFilter.UserID)
 
+	repository.Logger.Infof("query SQL: %v (%v)", SQL, args)
 	rows, err := tx.QueryContext(ctx, SQL, args...)
 	if err != nil {
+		repository.Logger.Errorf("failed to query context: %v", err)
 		return []domain.Task{}, err
 	}
 	defer rows.Close()
@@ -67,10 +72,13 @@ func (repository *TaskRepositoryImpl) FindTasks(ctx context.Context, tx *sql.Tx,
 		task := domain.Task{}
 		err := rows.Scan(&task.ID, &task.UserID, &task.Title, &task.Description, &task.Status, &task.DueDate, &task.CreatedAt, &task.UpdatedAt)
 		if err != nil {
+			repository.Logger.Errorf("failed to scan row: %v", err)
 			return []domain.Task{}, err
 		}
 		tasks = append(tasks, task)
 	}
+
+	repository.Logger.Info("-----END REPOSITORY LAYER-----")
 	return tasks, nil
 }
 
